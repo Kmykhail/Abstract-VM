@@ -5,8 +5,9 @@
 #ifndef AVM_IOPERAND_HPP
 #define AVM_IOPERAND_HPP
 
-#include <string>
 #include <iostream>
+#include <string>
+#include <sstream>
 
 enum eOperandType {Int8, Int16, Int32, Float, Double};
 
@@ -22,6 +23,5 @@ public:
     virtual std::string const & toString(void) const = 0;
     virtual ~IOperand( void ) {}
 };
-
 
 #endif //AVM_IOPERAND_HPP

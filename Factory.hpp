@@ -6,6 +6,8 @@
 
 #include "IOperand.hpp"
 
+class Factory;
+
 class Factory {
 public:
     IOperand const* createOperand( eOperandType type, std::string const & value) const;
