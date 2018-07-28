@@ -24,19 +24,6 @@ public:
     }
     ~Operand(){}
 
-    /*
-    IOperand const *	result_elem;
-	OperandFactory		factory;
-	double				result;
-
-	result = std::stod(toString()) + std::stod(r.toString());
-	if (getType() > r.getType())
-		result_elem = factory.createOperand(getType(), std::to_string(result));
-	else
-		result_elem = factory.createOperand(r.getType(), std::to_string(result));
-	return result_elem;
-     */
-
     int getPrecision( void ) const { return _precision; }
     eOperandType getType(void) const { return _type; }
     IOperand const * operator+(IOperand const & rhs) const {
