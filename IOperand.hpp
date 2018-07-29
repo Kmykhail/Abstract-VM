@@ -7,7 +7,11 @@
 
 #include <iostream>
 #include <string>
-#include <sstream>
+#include <cmath>
+#include <vector>
+#include <stack>
+#include <map>
+#include <regex>
 
 enum eOperandType {Int8, Int16, Int32, Float, Double};
 

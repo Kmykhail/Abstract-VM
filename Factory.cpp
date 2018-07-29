@@ -5,6 +5,17 @@
 #include "Factory.hpp"
 #include "Operand.hpp"
 
+Factory::Factory() {}
+
+Factory::~Factory() {}
+
+Factory::Factory(Factory const &rhs) { *this = rhs; }
+
+Factory& Factory::operator=(Factory const &rhs) {
+    (void)rhs;
+    return *this;
+}
+
 IOperand const* Factory::createInt8(std::string const &value) const {
     return new Operand<int8_t>(static_cast<int8_t >(std::stod(value)), Int8, value);
 }
