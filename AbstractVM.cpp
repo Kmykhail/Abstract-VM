@@ -29,34 +29,86 @@ pop
 assert double(42.42)
 exit*/
 
-
 #include "AbstractVM.hpp"
 
 AbstractVM::AbstractVM() : _filed_num(0){
+    std::cout << "::::" << INT8_MAX << INT8_MIN << std::endl;
+    _vec_class = new Virtual_Machine;
     readCommand();
 }
 
 AbstractVM::~AbstractVM() { }
 
 void    AbstractVM::readCommand() {
+    int check = 0;
     std::string buff;
     std::cout << "Enter: "<< std::endl;
-    while (std::getline(std::cin, buff) && std::cin){
+    for (int i = 0; std::getline(std::cin, buff) && std::cin; i++){
         _filed_num++;
-        checkValid(buff);
+        check = checkValid(buff);
+        if (check < 0 || check == 1)
+            _lex_map[i] = (check < 0) ? ("Error: Lexical error") : ("Comment");
+        else
+            _lex_map[i] = "Norm command";
     }
 }
 
 int AbstractVM::checkValid(std::string line) {
     std::cmatch result;
-    std::regex push("(^[ \\t]*?push [ \\t]*?((?=int8|int16|int32)int[0-9]{1,2})\\([-]*?[0-9]+\\)[ \\t]*?((?=[\\;]).*|$)"
+    std::cmatch buff;
+    std::regex rule("(^[ \\t]*?push [ \\t]*?((?=int8|int16|int32)int[0-9]{1,2})\\([-]*?[0-9]+\\)[ \\t]*?((?=[\\;]).*|$)"
                             "|^[ \\t]*?push [ \\t]*?((?=double)|double|float)\\([-]*?[0-9]*[.]?[0-9]+\\)[ \\t]*?((?=[\\;]).*|$)"
                             "|(^[ \\t]*?assert [ \\t]*?((?=int8|int16|int32)int[0-9]{1,2}\\([-]*?[0-9]+\\)|float\\([-]*?[0-9]*[.]?[0-9]+\\)|double\\([-]*?[0-9]*[.]?[0-9]+\\))[ \\t]*?((?=[\\;]).*|$))"
                             "|(^[ \\t]*?((?=add|sub|mul|div|mod|pop)[a-z]{3}|print|exit)[ \\t]*?((?=[\\;]).*|$))"
                             "|(^[ \\t]*?;((?=[\\;]);$|.*)))");
-    if (std::regex_match(line.c_str(), result, push))
-        std::cout << result.str() << std::endl;
-    else
-        std::cout << "False" << std::endl;
+    std::string nameFunc[11] = {"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit"};
+    if (!std::regex_match(line.c_str(), result, rule))
+        return -1;
+    if (std::regex_match(line.c_str(), buff, std::regex("^;(?!;).*")))
+        return 1;
+    void    (AbstractVM::*arrFunc[11])(std::string) = {
+        &AbstractVM::push, &AbstractVM::pop, &AbstractVM::dump, &AbstractVM::assert, &AbstractVM::add, &AbstractVM::sub,
+        &AbstractVM::mul, &AbstractVM::div, &AbstractVM::mod, &AbstractVM::print, &AbstractVM::exit
+    };
+    for (int i = 0; i < 11; ++i)
+        if (result.str().find(nameFunc[i]) != std::string::npos)
+            (this->*arrFunc[i])(result.str());
     return 0;
 }
+
+void AbstractVM::push(std::string str) {
+    std::smatch sm;
+    std::regex rule("[\\(][-]*?[0-9]+");
+    std::regex_search(str, sm, rule);
+    std::cout << "LOOK: " << sm.str().c_str() + 1 << std::endl;
+    double sz = std::stod(sm.str().c_str() + 1);//double  sz = std::stod(str.substr(pos));
+    std::cout << "!push" << std::endl;
+   /*if (Over_int8 || Over_int16 || Over_int32)
+        AbstractVM::Overflow("int");*/
+    IOperand * one = new Operand<int8_t >(sz, Int8, std::to_string(sz));
+    _vec_class->getVector().push_back(one);
+    std::cout << _vec_class->getVector().size() << std::endl;
+}
+void AbstractVM::dump(std::string str) {std::cout << "!dump" << std::endl;}
+void AbstractVM::pop(std::string str) {std::cout << "!pop" << std::endl;}
+void AbstractVM::assert(std::string str) {std::cout << "!assert" << std::endl;}
+void AbstractVM::add(std::string str) {std::cout << "!add" << std::endl;}
+void AbstractVM::sub(std::string str) {std::cout << "!sub" << std::endl;}
+void AbstractVM::mul(std::string str) {std::cout << "!mul" << std::endl;}
+void AbstractVM::div(std::string str) {std::cout << "!div" << std::endl;}
+void AbstractVM::mod(std::string str) {std::cout << "!mod" << std::endl;}
+void AbstractVM::print(std::string str) {std::cout << "!print" << std::endl;}
+void AbstractVM::exit(std::string str) {std::cout << "!exit" << std::endl;}
+
+AbstractVM::Overflow::Overflow() {}
+AbstractVM::Overflow::Overflow(std::string str) :_str_type(str){}
+AbstractVM::Overflow::~Overflow() throw(){}
+AbstractVM::Overflow::Overflow(Overflow const &cpy) { *this = cpy; }
+AbstractVM::Overflow & AbstractVM::Overflow::operator=(Overflow const &rhs) {
+    (void)rhs;
+    return *this;
+}
+const char* AbstractVM::Overflow::what() const throw() {
+    return "some Overflow";
+}
+
