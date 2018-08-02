@@ -31,6 +31,7 @@ public:
     Virtual_Machine();
     ~Virtual_Machine();
     std::vector<IOperand*> getVector() const;
+    void                   setVector(IOperand *);
 private:
     std::vector<IOperand *> _vec;
 };

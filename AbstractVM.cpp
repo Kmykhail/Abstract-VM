@@ -78,17 +78,30 @@ int AbstractVM::checkValid(std::string line) {
 
 void AbstractVM::push(std::string str) {
     std::smatch sm;
-    std::regex rule("[\\(][-]*?[0-9]+");
+    std::regex rule("[\\(][-]*?[0-9]*[.]?[0-9]+");
     std::regex_search(str, sm, rule);
-    std::cout << "LOOK: " << sm.str().c_str() + 1 << std::endl;
-    double sz = std::stod(sm.str().c_str() + 1);//double  sz = std::stod(str.substr(pos));
+    double sz = std::stod(sm.str().c_str() + 1);
     std::cout << "!push" << std::endl;
-   /*if (Over_int8 || Over_int16 || Over_int32)
-        AbstractVM::Overflow("int");*/
-    IOperand * one = new Operand<int8_t >(sz, Int8, std::to_string(sz));
-    _vec_class->getVector().push_back(one);
-    std::cout << _vec_class->getVector().size() << std::endl;
+    if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?int8")))
+        _vec_class->setVector(new Operand<int8_t >(sz, Int8, "0"));
+    else if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?int16")))
+        _vec_class->setVector(new Operand<int16_t >(sz, Int16, "0"));
+    else if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?int32")))
+        _vec_class->setVector(new Operand<int32_t >(sz, Int32, "0"));
+    else if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?((?=float)float|double)")))
+    {
+        int prec = 0;
+        std::string slen = std::to_string(sz);
+        for (size_t i = 0; i != slen.size() ; ++i)
+            prec += (slen[i] == '.' || prec > 0) ? 1 : 0;
+        if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?float")))
+            _vec_class->setVector(new Operand<float>(sz, Float, std::to_string(prec)));
+        else
+            _vec_class->setVector(new Operand<double>(sz, Double, std::to_string(prec)));
+    }
+
 }
+
 void AbstractVM::dump(std::string str) {std::cout << "!dump" << std::endl;}
 void AbstractVM::pop(std::string str) {std::cout << "!pop" << std::endl;}
 void AbstractVM::assert(std::string str) {std::cout << "!assert" << std::endl;}

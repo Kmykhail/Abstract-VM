@@ -9,3 +9,7 @@ Virtual_Machine::Virtual_Machine() { }
 Virtual_Machine::~Virtual_Machine() { }
 
 std::vector<IOperand*> Virtual_Machine::getVector() const { return _vec; }
+
+void Virtual_Machine::setVector(IOperand * one) {
+    _vec.push_back(one);
+}

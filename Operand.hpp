@@ -8,13 +8,32 @@
 #include "IOperand.hpp"
 #include "Factory.hpp"
 
+/*
+template <class T>
+Operand<T>::Operand()
+{}
+*/
+
+//template<class X> struct foo { X x; };
+
+//template<template<class> class X> struct foo { X<int> x; };
 
 template <class T>
 
 class Operand : public IOperand {
+private:
+    T _some_value;
+    int _precision;
+    eOperandType _type;
+    mutable std::string _str;
 public:
     Operand(){}
-    Operand(T val, eOperandType type, std::string str) : _some_value(val), _type(type), _str(str){}
+    Operand(T val, eOperandType type, std::string precison) {
+        _some_value = val;
+        _type = type;
+        _precision = std::stoi(precison);
+        _str = std::to_string(_some_value);
+    }
     Operand(Operand const & rhs){ *this = rhs; }
     Operand & operator=(Operand const & rhs){
         if (this != &rhs){
@@ -31,21 +50,21 @@ public:
     eOperandType getType(void) const { return _type; }
     IOperand const * operator+(IOperand const & rhs) const {
         Factory factory;
-        double num = std::stod(_str) + std::stod(rhs.toString());
+        double num = _some_value + std::stod(rhs.toString());
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));
         return fin;
     }
     IOperand const * operator-(IOperand const & rhs) const {
         Factory factory;
-        double num = std::abs(std::stod(_str) - std::stod(rhs.toString()));
+        double num = std::abs(_some_value - std::stod(rhs.toString()));
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));
         return fin;
     }
     IOperand const * operator*(IOperand const & rhs) const {
         Factory factory;
-        double num = std::stod(_str) * std::stod(rhs.toString());
+        double num = _some_value * std::stod(rhs.toString());
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));
         return fin;
@@ -61,7 +80,7 @@ public:
             std::cout << "Division by zero" << std::endl;
             return nullptr;
         }
-        double num = std::stod(_str) / std::stod(rhs.toString());
+        double num = _some_value / std::stod(rhs.toString());
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));
         return fin;
@@ -75,7 +94,7 @@ public:
             std::cout << "Error modulo" << std::endl;
             return nullptr;
         }
-        double num = std::fmod(std::stod(_str), std::stod(rhs.toString()));
+        double num = std::fmod(_some_value, std::stod(rhs.toString()));
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));
         return fin;
@@ -84,11 +103,6 @@ public:
         _str = std::to_string(_some_value);
         return _str;
     }
-private:
-    T _some_value;
-    int _precision;
-    eOperandType _type;
-    mutable std::string _str;
 };
 
 #endif //AVM_OPERAND_CLASS_HPP
