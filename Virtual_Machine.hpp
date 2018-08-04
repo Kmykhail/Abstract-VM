@@ -7,7 +7,7 @@
 
 #include "Operand.hpp"
 
-//template<typename T_>
+//template<typename T_>pus
 /*emplate <typename T>
 
 {
@@ -31,7 +31,10 @@ public:
     Virtual_Machine();
     ~Virtual_Machine();
     std::vector<IOperand*> getVector() const;
-    void                   setVector(IOperand *);
+    std::string            getLastValFromVector() const;
+    eOperandType           getLastTypeOperand() const;
+    void                   setVector(IOperand * op);
+    void                   popVector(size_t num);
 private:
     std::vector<IOperand *> _vec;
 };

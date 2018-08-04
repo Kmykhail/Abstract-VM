@@ -6,8 +6,12 @@
 #define AVM_IOPERAND_HPP
 
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <string>
 #include <cmath>
+#include <climits>
+#include <cfloat>
 #include <vector>
 #include <stack>
 #include <map>

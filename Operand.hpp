@@ -8,16 +8,6 @@
 #include "IOperand.hpp"
 #include "Factory.hpp"
 
-/*
-template <class T>
-Operand<T>::Operand()
-{}
-*/
-
-//template<class X> struct foo { X x; };
-
-//template<template<class> class X> struct foo { X<int> x; };
-
 template <class T>
 
 class Operand : public IOperand {
@@ -26,13 +16,15 @@ private:
     int _precision;
     eOperandType _type;
     mutable std::string _str;
+    std::stringstream _ssObj;
 public:
     Operand(){}
     Operand(T val, eOperandType type, std::string precison) {
-        _some_value = val;
         _type = type;
         _precision = std::stoi(precison);
-        _str = std::to_string(_some_value);
+        _ssObj << std:: fixed << std::setprecision(_precision) << val;
+        this->toString();
+        _ssObj >> _some_value;
     }
     Operand(Operand const & rhs){ *this = rhs; }
     Operand & operator=(Operand const & rhs){
@@ -48,6 +40,7 @@ public:
 
     int getPrecision( void ) const { return _precision; }
     eOperandType getType(void) const { return _type; }
+
     IOperand const * operator+(IOperand const & rhs) const {
         Factory factory;
         double num = _some_value + std::stod(rhs.toString());
@@ -100,7 +93,7 @@ public:
         return fin;
     }
     std::string const & toString(void) const {
-        _str = std::to_string(_some_value);
+        _str = _ssObj.str();
         return _str;
     }
 };
