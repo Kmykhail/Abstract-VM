@@ -24,23 +24,41 @@ void AbstractVM::initVM() {
     _vec_class = new Virtual_Machine;
     _prec = 0;
     _filed_num = 0;
+    _fd = false;
+    _fin = false;
 }
 
 AbstractVM::~AbstractVM() { }
 
-void    AbstractVM::readCommand() {
+int    AbstractVM::readCommand(int ac, char *av) {
     int check = 0;
     std::string buff;
-    std::cout << "Enter: "<< std::endl;
     std::ifstream file;
-    //file.open(_av);
-    for (int i = 0; std::getline(std::cin, buff) && std::cin; i++){
-        check = checkValid(buff);
-        if (check < 0 || check == 1)
-            _lex_map[_filed_num++] = (check < 0) ? ("Error: Lexical error") : ("Comment");
-        else
-            _lex_map[_filed_num++] = "Norm command";
+    file.open(av);
+    if (ac > 2 || (!file.is_open() && ac == 2))
+        throw AbstractVM::Read_ex();
+    if (ac == 1)
+    {
+        for (int i = 0; !_fin && std::getline(std::cin, buff); i++) {
+            check = checkValid(buff);
+            if (check < 0 || check == 1)
+                _lex_map[_filed_num++] = (check < 0) ? ("Error: Lexical error") : ("Comment");
+        }
     }
+    else {
+        _fd = true;
+        for (int i = 0; std::getline(file, buff); ++i) {
+            check = checkValid(buff);
+            if (check < 0 || check == 1)
+                _lex_map[_filed_num++] = (check < 0) ? ("Error: Lexical error") : ("Comment");
+        }
+        file.close();
+    }
+    for (std::map<int, std::string>::iterator it = _lex_map.begin(); it != _lex_map.end() ; it++) {
+        if (it->second.find("Error") != std::string::npos || it->second.find("dump") != std::string::npos)
+            std::cout << "Line:" << "[" << it->first + 1 << "] =>" << it->second << std::endl;
+    }
+    return 0;
 }
 
 double AbstractVM::StrToDouble(const std::string str, const size_t l) {
@@ -62,16 +80,19 @@ int AbstractVM::checkValid(std::string line) {
     std::string nameFunc[11] = {"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit"};
     if (!std::regex_match(line.c_str(), result, rule))
         return -1;
-    if (std::regex_match(line.c_str(), buff, std::regex("^;(?!;).*")))
+    if (std::regex_match(line.c_str(), result, std::regex("^;;")) && !_fd) {
+        _fin = true;
+        return (_filed_num && _lex_map[_filed_num - 1].find("exit") != std::string::npos) ? 0 : -1;
+    }
+    if (std::regex_match(line.c_str(), buff, std::regex("^[ \\t]*?;.*")))
         return 1;
     void    (AbstractVM::*arrFunc[11])(std::string) = {
         &AbstractVM::push, &AbstractVM::pop, &AbstractVM::dump, &AbstractVM::assert, &AbstractVM::add, &AbstractVM::sub,
         &AbstractVM::mul, &AbstractVM::div, &AbstractVM::mod, &AbstractVM::print, &AbstractVM::exit
     };
-    line  = result.str();
-    line = std::regex_replace(result.str(), std::regex("[;].*"), "");
+    line = std::regex_replace(line, std::regex("[\\;].*"), "");
     for (int i = 0; i < 11; ++i)
-        if (result.str().find(nameFunc[i]) != std::string::npos)
+        if (line.find(nameFunc[i]) != std::string::npos)
             (this->*arrFunc[i])(line);
     return 0;
 }
@@ -86,7 +107,7 @@ int AbstractVM::getFiled_num() const { return _filed_num; }
 void AbstractVM::push(std::string str) {
     std::smatch sm;
     std::regex_search(str, sm, std::regex("[\\(][-]*?[0-9]*[.]?[0-9]+"));
-    _prec = (sm.str().find('.')) ? sm.str().size() - 1 - sm.str().find('.') : 0;
+    _prec = (sm.str().find('.') != std::string::npos) ? sm.str().size() - 1 - sm.str().find('.') : 0;
     double sz = StrToDouble(sm.str(), _prec);
     if (Over_int8 || Over_int16 || Over_int32 || Over_float)
         throw AbstractVM::Overflow_ex();
@@ -105,13 +126,17 @@ void AbstractVM::push(std::string str) {
         else
             _vec_class->setVector(new Operand<double>(sz, Double, _prec));
     }
+    _lex_map[_filed_num++] = str;
 }
 
 void AbstractVM::dump(std::string str) {
     std::cout << "!dump" << std::endl;
-    for (size_t i = _vec_class->getVector().size() - 1; i != SIZE_MAX ; --i) {
-        std::cout << _vec_class->getVector().at(i)->toString() << std::endl;
-    }
+    //if (exception)
+        //
+    _lex_map[_filed_num] = str + ":";
+    for (size_t i = _vec_class->getVector().size() - 1; i != SIZE_MAX ; --i)
+        _lex_map[_filed_num] += "\n " + _vec_class->getVector().at(i)->toString();
+    _filed_num++;
 }
 void AbstractVM::pop(std::string str) {
     std::cout << "!pop" << std::endl;
@@ -119,6 +144,7 @@ void AbstractVM::pop(std::string str) {
         throw AbstractVM::Pop_ex();
     else
         _vec_class->popVector(1);
+    _lex_map[_filed_num++] = str;
 }
 
 void AbstractVM::assert(std::string str) {
@@ -133,6 +159,7 @@ void AbstractVM::assert(std::string str) {
     else if (eType != _vec_class->getLastTypeOperand() || sm.str() != _vec_class->getLastValFromVector())
         throw AbstractVM::Assert_ex();
     std::cout << "Ok" << std::endl;
+    _lex_map[_filed_num++] = str + ":\n  " + _vec_class->getLastValFromVector();
 }
 
 void AbstractVM::add(std::string str) {
@@ -144,6 +171,7 @@ void AbstractVM::add(std::string str) {
     IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) + (*_vec_class->getVector()[ln - 1]));
     _vec_class->popVector(2);
     _vec_class->setVector(nw);
+    _lex_map[_filed_num++] = str;
 }
 
 void AbstractVM::sub(std::string str) {
@@ -155,6 +183,7 @@ void AbstractVM::sub(std::string str) {
     IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) - (*_vec_class->getVector()[ln - 1]));
     _vec_class->popVector(2);
     _vec_class->setVector(nw);
+    _lex_map[_filed_num++] = str;
 }
 
 void AbstractVM::mul(std::string str) {
@@ -166,6 +195,7 @@ void AbstractVM::mul(std::string str) {
     IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) * (*_vec_class->getVector()[ln - 1]));
     _vec_class->popVector(2);
     _vec_class->setVector(nw);
+    _lex_map[_filed_num++] = str;
 }
 
 void AbstractVM::div(std::string str) {
@@ -179,6 +209,7 @@ void AbstractVM::div(std::string str) {
     IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) / (*_vec_class->getVector()[ln - 1]));
     _vec_class->popVector(2);
     _vec_class->setVector(nw);
+    _lex_map[_filed_num++] = str;
 }
 
 void AbstractVM::mod(std::string str) {
@@ -192,6 +223,7 @@ void AbstractVM::mod(std::string str) {
     IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) % (*_vec_class->getVector()[ln - 1]));
     _vec_class->popVector(2);
     _vec_class->setVector(nw);
+    _lex_map[_filed_num++] = str;
 }
 
 void AbstractVM::print(std::string str) {
@@ -202,26 +234,26 @@ void AbstractVM::print(std::string str) {
     //----------------exception----------------//
 
     //----------------norm---------------------//
+    _lex_map[_filed_num] = str + ":";
     for (ln -= 1; ln != SIZE_MAX && _vec_class->getVector()[ln]->getType() == Int8; --ln)
-        std::cout << _vec_class->getVector()[ln]->toString() << std::endl;
+        _lex_map[_filed_num] += "\n " + _vec_class->getVector()[ln]->toString();//std::cout << _vec_class->getVector()[ln]->toString() << std::endl;
+    _filed_num++;
 }
 
 void AbstractVM::exit(std::string str) {
     std::cout << "!exit" << std::endl;
-    //нужно подумать
+    _lex_map[_filed_num++] = str;
 }
 
+
+//не нужен
 AbstractVM::Overflow_ex::Overflow_ex() {}
 AbstractVM::Overflow_ex::Overflow_ex(std::string str) :_str_type(str){}
-AbstractVM::Overflow_ex::~Overflow_ex() throw(){}
+AbstractVM::Overflow_ex::~Overflow_ex() _NOEXCEPT{}
 AbstractVM::Overflow_ex::Overflow_ex(Overflow_ex const &cpy) { *this = cpy; }
 AbstractVM::Overflow_ex & AbstractVM::Overflow_ex::operator=(Overflow_ex const &rhs) {
     (void)rhs;
     return *this;
-}
-
-const char* AbstractVM::Overflow_ex::what() const throw() {
-    return "some Overflow_ex";
 }
 
 AbstractVM::Pop_ex::Pop_ex(){}
@@ -241,9 +273,22 @@ AbstractVM::Pop_ex& AbstractVM::Pop_ex::operator=(Pop_ex const &rhs) {
 AbstractVM::Assert_ex::Assert_ex(){
     std::cout << "Pizda" << std::endl;
 }
+
 AbstractVM::Assert_ex::~Assert_ex() throw(){}
 AbstractVM::Assert_ex::Assert_ex(Assert_ex const &cpy) { *this = cpy;}
 AbstractVM::Assert_ex & AbstractVM::Assert_ex::operator=(Assert_ex const &rhs) {
     (void)rhs;
     return *this;
+}
+
+AbstractVM::Read_ex::Read_ex() {}
+AbstractVM::Read_ex::~Read_ex() _NOEXCEPT {}
+AbstractVM::Read_ex::Read_ex(Read_ex const &cpy) { *this = cpy;}
+AbstractVM::Read_ex& AbstractVM::Read_ex::operator=(Read_ex const &rhs) {
+    (void)rhs;
+    return *this;
+}
+
+const char* AbstractVM::Read_ex::what() const throw() {
+    return "Usage: [./a.out]  or [./a.out][valid file]\n";
 }

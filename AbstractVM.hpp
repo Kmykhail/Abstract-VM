@@ -26,10 +26,12 @@ private:
     Virtual_Machine *_vec_class;
     mutable std::map<int, std::string> _lex_map;
     int             _prec;
+    bool            _fd;
+    bool            _fin;
 public:
     explicit AbstractVM();
     ~AbstractVM();
-    void    readCommand();
+    int    readCommand(int ac, char* av);
     std::map<int, std::string> getMap() const;
     void                       setMap(int itr, std::string str) const;
     int                        getFiled_num() const;
@@ -40,10 +42,9 @@ public:
     public:
         Overflow_ex();
         Overflow_ex(std::string);
-        virtual ~Overflow_ex() throw();
+        virtual ~Overflow_ex() _NOEXCEPT;
         Overflow_ex(Overflow_ex const & cpy);
         Overflow_ex &operator=(Overflow_ex const & rhs);
-        virtual const char* what() const throw();
     };
     class Pop_ex: public std::exception{
     public:
@@ -67,6 +68,7 @@ public:
         virtual ~Read_ex() _NOEXCEPT;
         Read_ex(Read_ex const & cpy);
         Read_ex & operator=(Read_ex const & rhs);
+        virtual const char* what() const throw();
     };
 };
 

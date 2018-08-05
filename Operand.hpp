@@ -66,7 +66,6 @@ public:
         : factory.createOperand(_type, std::to_string(num));
         return fin;
     }
-
     IOperand const * operator/(IOperand const & rhs) const {
         Factory factory;
         double num = _some_value / std::stod(rhs.toString());
@@ -82,9 +81,12 @@ public:
         return fin;
     }
     std::string const & toString(void) const {
-        _str = _ssObj.str();
+        if (_type == Int8)
+            _str = std::to_string((int)_ssObj.str().c_str()[0]);
+        else
+            _str = _ssObj.str();
         return _str;
     }
 };
 
-#endif //AVM_OPERAND_CLASS_HPP
+#endif
