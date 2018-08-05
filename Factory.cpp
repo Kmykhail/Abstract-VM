@@ -17,24 +17,23 @@ Factory& Factory::operator=(Factory const &rhs) {
 }
 
 IOperand const* Factory::createInt8(std::string const &value) const {
-    return new Operand<int8_t>(static_cast<int8_t >(std::stod(value)), Int8, "0");
+    return new Operand<int8_t>(static_cast<int8_t >(std::stod(value)), Int8, 0);
 }
 
 IOperand const* Factory::createInt16(std::string const &value) const {
-    return new Operand<int16_t >(static_cast<int16_t >(std::stod(value)), Int16, "0");
+    return new Operand<int16_t >(static_cast<int16_t >(std::stod(value)), Int16, 0);
 }
 
 IOperand const* Factory::createInt32(std::string const &value) const {
-    return new Operand<int32_t >(static_cast<int32_t >(std::stod(value)), Int32, "0");
+    return new Operand<int32_t >(static_cast<int32_t >(std::stod(value)), Int32, 0);
 }
 
 IOperand const* Factory::createFloat(std::string const &value) const {
-    return new Operand<float >(static_cast<float >(std::stod(value)), Float, "0");
+    return new Operand<float >(static_cast<float >(std::stod(value)), Float, 0);
 }
 
 IOperand const* Factory::createDouble(std::string const &value) const {
-    std::cout << "Value :" << value << std::endl;
-    return new Operand<double>(static_cast<double>(std::stod(value)), Double, "0");
+    return new Operand<double>(static_cast<double>(std::stod(value)), Double, 0);
 }
 
 IOperand const* Factory::createOperand(eOperandType type, std::string const &value) const {

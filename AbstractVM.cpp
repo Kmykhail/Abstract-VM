@@ -16,14 +16,14 @@ int         typeStr(std::string str){
     return 4;
 }
 
-AbstractVM::AbstractVM() : _filed_num(0){
-
+AbstractVM::AbstractVM(){
+    initVM();
 }
 
-AbstractVM::AbstractVM(int fd) : _fd(fd), _filed_num(0) {
+void AbstractVM::initVM() {
     _vec_class = new Virtual_Machine;
     _prec = 0;
-    readCommand();
+    _filed_num = 0;
 }
 
 AbstractVM::~AbstractVM() { }
@@ -32,6 +32,8 @@ void    AbstractVM::readCommand() {
     int check = 0;
     std::string buff;
     std::cout << "Enter: "<< std::endl;
+    std::ifstream file;
+    //file.open(_av);
     for (int i = 0; std::getline(std::cin, buff) && std::cin; i++){
         check = checkValid(buff);
         if (check < 0 || check == 1)
@@ -84,25 +86,24 @@ int AbstractVM::getFiled_num() const { return _filed_num; }
 void AbstractVM::push(std::string str) {
     std::smatch sm;
     std::regex_search(str, sm, std::regex("[\\(][-]*?[0-9]*[.]?[0-9]+"));
-    //double sz = std::stod(sm.str().c_str() + 1);
     _prec = (sm.str().find('.')) ? sm.str().size() - 1 - sm.str().find('.') : 0;
     double sz = StrToDouble(sm.str(), _prec);
     if (Over_int8 || Over_int16 || Over_int32 || Over_float)
         throw AbstractVM::Overflow_ex();
     std::cout << "!push" << std::endl;
     if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?int8")))
-        _vec_class->setVector(new Operand<int8_t >(sz, Int8, "0"));
+        _vec_class->setVector(new Operand<int8_t >(sz, Int8, 0));
     else if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?int16")))
-        _vec_class->setVector(new Operand<int16_t >(sz, Int16, "0"));
+        _vec_class->setVector(new Operand<int16_t >(sz, Int16, 0));
     else if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?int32")))
-        _vec_class->setVector(new Operand<int32_t >(sz, Int32, "0"));
+        _vec_class->setVector(new Operand<int32_t >(sz, Int32, 0));
     else if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?((?=float)float|double)")))
     {
         std::string slen = std::to_string(sz);
         if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?float")))
-            _vec_class->setVector(new Operand<float>(sz, Float, std::to_string(_prec)));
+            _vec_class->setVector(new Operand<float>(sz, Float, _prec));
         else
-            _vec_class->setVector(new Operand<double>(sz, Double, std::to_string(_prec)));
+            _vec_class->setVector(new Operand<double>(sz, Double, _prec));
     }
 }
 

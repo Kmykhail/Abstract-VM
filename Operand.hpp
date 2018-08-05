@@ -19,18 +19,20 @@ private:
     std::stringstream _ssObj;
 public:
     Operand(){}
-    Operand(T val, eOperandType type, std::string precison) {
+    Operand(T val, eOperandType type, int precison) {
         _type = type;
-        _precision = std::stoi(precison);
+        _precision = precison;
         if (_precision > 0)
             _ssObj << std:: fixed << std::setprecision(_precision) << val;
+        else
+            _ssObj << val;
         this->toString();
         _ssObj >> _some_value;
     }
     Operand(Operand const & rhs){ *this = rhs; }
     Operand & operator=(Operand const & rhs){
         if (this != &rhs){
-            _some_value = rhs._some_value;
+            getDigitVal() >> _some_value;
             _str = rhs.toString();
             _precision = rhs.getPrecision();
             _type = rhs.getType();
@@ -41,13 +43,11 @@ public:
 
     int getPrecision( void ) const { return _precision; }
     eOperandType getType(void) const { return _type; }
+    std::stringstream   getDigitVal() const { return _ssObj;}
 
     IOperand const * operator+(IOperand const & rhs) const {
         Factory factory;
-        //double num = _some_value + std::stod(rhs.toString());
-        double num = 0;
-        if (this->getType() >= Float || rhs.getType() >= Float)
-            
+        double num = _some_value + std::stod(rhs.toString());
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));
         return fin;

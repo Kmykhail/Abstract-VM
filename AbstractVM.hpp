@@ -6,15 +6,11 @@
 #define AVM_ABSTRACTVM_HPP
 
 #include "Virtual_Machine.hpp"
-#define Over_int8 (str.find("int8") != std::string::npos && (sz > INT8_MAX || sz < INT8_MIN))
-#define Over_int16 (str.find("int16") != std::string::npos && (sz > INT16_MAX || sz < INT16_MIN))
-#define Over_int32 (str.find("int32") != std::string::npos && (sz > INT32_MAX || sz < INT32_MIN))
-#define Over_float (str.find("float") != std::string::npos && (sz > FLT_MAX || sz < FLT_MIN))
-#define Diff_val (sz != std::stod(_vec_class->getLastValFromVector()))
 
 class AbstractVM {
 private:
     int     checkValid(std::string line);
+    void    initVM();
     void    push(std::string);
     void    dump(std::string);
     void    pop(std::string);
@@ -28,13 +24,10 @@ private:
     void    exit(std::string);
     int               _filed_num;
     Virtual_Machine *_vec_class;
-    Factory         *_factory;
     mutable std::map<int, std::string> _lex_map;
-    size_t             _prec;
-    int                _fd;
+    int             _prec;
 public:
-    AbstractVM();
-    explicit AbstractVM(int fd);
+    explicit AbstractVM();
     ~AbstractVM();
     void    readCommand();
     std::map<int, std::string> getMap() const;
@@ -66,7 +59,14 @@ public:
         virtual ~Assert_ex() throw();
         Assert_ex(Assert_ex const & cpy);
         Assert_ex & operator=(Assert_ex const & rhs);
+    };
 
+    class Read_ex: public std::exception{
+    public:
+        Read_ex();
+        virtual ~Read_ex() _NOEXCEPT;
+        Read_ex(Read_ex const & cpy);
+        Read_ex & operator=(Read_ex const & rhs);
     };
 };
 
