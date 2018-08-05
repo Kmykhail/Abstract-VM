@@ -31,8 +31,10 @@ private:
     Factory         *_factory;
     mutable std::map<int, std::string> _lex_map;
     size_t             _prec;
+    int                _fd;
 public:
     AbstractVM();
+    explicit AbstractVM(int fd);
     ~AbstractVM();
     void    readCommand();
     std::map<int, std::string> getMap() const;

@@ -22,7 +22,8 @@ public:
     Operand(T val, eOperandType type, std::string precison) {
         _type = type;
         _precision = std::stoi(precison);
-        _ssObj << std:: fixed << std::setprecision(_precision) << val;
+        if (_precision > 0)
+            _ssObj << std:: fixed << std::setprecision(_precision) << val;
         this->toString();
         _ssObj >> _some_value;
     }
@@ -43,7 +44,10 @@ public:
 
     IOperand const * operator+(IOperand const & rhs) const {
         Factory factory;
-        double num = _some_value + std::stod(rhs.toString());
+        //double num = _some_value + std::stod(rhs.toString());
+        double num = 0;
+        if (this->getType() >= Float || rhs.getType() >= Float)
+            
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));
         return fin;

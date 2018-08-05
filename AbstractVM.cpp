@@ -17,6 +17,10 @@ int         typeStr(std::string str){
 }
 
 AbstractVM::AbstractVM() : _filed_num(0){
+
+}
+
+AbstractVM::AbstractVM(int fd) : _fd(fd), _filed_num(0) {
     _vec_class = new Virtual_Machine;
     _prec = 0;
     readCommand();
@@ -104,8 +108,9 @@ void AbstractVM::push(std::string str) {
 
 void AbstractVM::dump(std::string str) {
     std::cout << "!dump" << std::endl;
-    for (size_t i = _vec_class->getVector().size() - 1; i != SIZE_MAX ; --i)
+    for (size_t i = _vec_class->getVector().size() - 1; i != SIZE_MAX ; --i) {
         std::cout << _vec_class->getVector().at(i)->toString() << std::endl;
+    }
 }
 void AbstractVM::pop(std::string str) {
     std::cout << "!pop" << std::endl;
@@ -187,6 +192,7 @@ void AbstractVM::mod(std::string str) {
     _vec_class->popVector(2);
     _vec_class->setVector(nw);
 }
+
 void AbstractVM::print(std::string str) {
     std::cout << "!print" << std::endl;
     size_t ln = _vec_class->getVector().size();
@@ -195,11 +201,14 @@ void AbstractVM::print(std::string str) {
     //----------------exception----------------//
 
     //----------------norm---------------------//
-    for (ln -= 1; ln != SIZE_MAX && !_vec_class->getVector()[ln]->getType(); --ln)
-        std::cout << (char) std::stod(_vec_class->getVector()[ln]->toString()) << std::endl;
+    for (ln -= 1; ln != SIZE_MAX && _vec_class->getVector()[ln]->getType() == Int8; --ln)
+        std::cout << _vec_class->getVector()[ln]->toString() << std::endl;
 }
 
-void AbstractVM::exit(std::string str) {std::cout << "!exit" << std::endl;}
+void AbstractVM::exit(std::string str) {
+    std::cout << "!exit" << std::endl;
+    //нужно подумать
+}
 
 AbstractVM::Overflow_ex::Overflow_ex() {}
 AbstractVM::Overflow_ex::Overflow_ex(std::string str) :_str_type(str){}

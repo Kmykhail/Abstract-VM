@@ -10,7 +10,6 @@ Virtual_Machine::~Virtual_Machine() { }
 
 std::vector<IOperand*> Virtual_Machine::getVector() const { return _vec; }
 
-
 void Virtual_Machine::setVector(IOperand * op) { _vec.push_back(op);}
 
 void Virtual_Machine::popVector(size_t num) {
