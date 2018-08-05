@@ -65,14 +65,6 @@ public:
 
     IOperand const * operator/(IOperand const & rhs) const {
         Factory factory;
-        try { // exception пока будет тут, НО потом перенести
-            if (!std::stod(rhs.toString()))
-                throw 0;
-        }
-        catch(int zero){
-            std::cout << "Division by zero" << std::endl;
-            return nullptr;
-        }
         double num = _some_value / std::stod(rhs.toString());
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));
@@ -80,13 +72,6 @@ public:
     }
     IOperand const *operator%(IOperand const & rhs) const {
         Factory factory;
-        try {
-            if (!std::stod(rhs.toString()))
-                throw 0;
-        }catch (int zero){
-            std::cout << "Error modulo" << std::endl;
-            return nullptr;
-        }
         double num = std::fmod(_some_value, std::stod(rhs.toString()));
         IOperand const * fin = (_type <= rhs.getType()) ? factory.createOperand(rhs.getType(), std::to_string(num))\
         : factory.createOperand(_type, std::to_string(num));

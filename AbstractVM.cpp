@@ -135,17 +135,70 @@ void AbstractVM::add(std::string str) {
     //----------------exception----------------//
 
     //----------------norm---------------------//
-    IOperand * wr = const_cast<IOperand*>(*_vec_class->getVector()[ln - 2] + *_vec_class->getVector()[ln - 1]);
-    std::cout << "Stroka: " << wr->toString() << " Value: " << std::stod(wr->toString()) << std::endl;
+    IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) + (*_vec_class->getVector()[ln - 1]));
     _vec_class->popVector(2);
-    _vec_class->setVector(wr);
+    _vec_class->setVector(nw);
 }
 
-void AbstractVM::sub(std::string str) {std::cout << "!sub" << std::endl;}
-void AbstractVM::mul(std::string str) {std::cout << "!mul" << std::endl;}
-void AbstractVM::div(std::string str) {std::cout << "!div" << std::endl;}
-void AbstractVM::mod(std::string str) {std::cout << "!mod" << std::endl;}
-void AbstractVM::print(std::string str) {std::cout << "!print" << std::endl;}
+void AbstractVM::sub(std::string str) {
+    std::cout << "!sub" << std::endl;
+    size_t ln = _vec_class->getVector().size();
+    //----------------exception----------------//
+
+    //----------------norm---------------------//
+    IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) - (*_vec_class->getVector()[ln - 1]));
+    _vec_class->popVector(2);
+    _vec_class->setVector(nw);
+}
+
+void AbstractVM::mul(std::string str) {
+    std::cout << "!mul" << std::endl;
+    size_t ln = _vec_class->getVector().size();
+    //----------------exception----------------//
+
+    //----------------norm---------------------//
+    IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) * (*_vec_class->getVector()[ln - 1]));
+    _vec_class->popVector(2);
+    _vec_class->setVector(nw);
+}
+
+void AbstractVM::div(std::string str) {
+    std::cout << "!div" << std::endl;
+    size_t ln = _vec_class->getVector().size();
+    /*if (!std::stod(_vec_class->getLastValFromVector()) // exception on DIV ZERO
+        throw SOME_EXCEPTION*/
+    //----------------exception----------------//
+
+    //----------------norm---------------------//
+    IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) / (*_vec_class->getVector()[ln - 1]));
+    _vec_class->popVector(2);
+    _vec_class->setVector(nw);
+}
+
+void AbstractVM::mod(std::string str) {
+    std::cout << "!mod" << std::endl;
+    size_t ln = _vec_class->getVector().size();
+    /*if (!std::stod(_vec_class->getLastValFromVector()) // exception on DIV ZERO
+    throw SOME_EXCEPTION*/
+    //----------------exception----------------//
+
+    //----------------norm---------------------//
+    IOperand* nw = const_cast<IOperand*>((*_vec_class->getVector()[ln - 2]) % (*_vec_class->getVector()[ln - 1]));
+    _vec_class->popVector(2);
+    _vec_class->setVector(nw);
+}
+void AbstractVM::print(std::string str) {
+    std::cout << "!print" << std::endl;
+    size_t ln = _vec_class->getVector().size();
+    /*if (_vec_class->getLastTypeOperand() != Int8)
+        throw;*/
+    //----------------exception----------------//
+
+    //----------------norm---------------------//
+    for (ln -= 1; ln != SIZE_MAX && !_vec_class->getVector()[ln]->getType(); --ln)
+        std::cout << (char) std::stod(_vec_class->getVector()[ln]->toString()) << std::endl;
+}
+
 void AbstractVM::exit(std::string str) {std::cout << "!exit" << std::endl;}
 
 AbstractVM::Overflow_ex::Overflow_ex() {}
