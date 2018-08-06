@@ -17,18 +17,30 @@ Factory& Factory::operator=(Factory const &rhs) {
 }
 
 IOperand const* Factory::createInt8(std::string const &value) const {
+    double val = std::stod(value);
+    if (val > INT8_MAX || val < INT8_MIN)
+        throw "[Result value big than type int8]";
     return new Operand<int8_t>(static_cast<int8_t >(std::stod(value)), Int8, 0);
 }
 
 IOperand const* Factory::createInt16(std::string const &value) const {
+    double val = std::stod(value);
+    if (val > INT16_MAX || val < INT16_MIN)
+        throw "[Result value big than type int16]";
     return new Operand<int16_t >(static_cast<int16_t >(std::stod(value)), Int16, 0);
 }
 
 IOperand const* Factory::createInt32(std::string const &value) const {
+    double val = std::stod(value);
+    if (val > INT32_MAX || val < INT32_MIN)
+        throw "[Result value big than type int32]";
     return new Operand<int32_t >(static_cast<int32_t >(std::stod(value)), Int32, 0);
 }
 
 IOperand const* Factory::createFloat(std::string const &value) const {
+    double val = std::stod(value);
+    if (val > FLT_MAX || val < -FLT_MAX)
+        throw "[Result value big than type float]";
     return new Operand<float >(static_cast<float >(std::stod(value)), Float, 0);
 }
 

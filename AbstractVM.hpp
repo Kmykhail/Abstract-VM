@@ -9,6 +9,9 @@
 
 class AbstractVM {
 private:
+    void    Ask();
+    int     Parse_error(std::string line, std::regex rule);
+    void    Print_map();
     int     checkValid(std::string line);
     void    initVM();
     void    push(std::string);
@@ -28,39 +31,13 @@ private:
     int             _prec;
     bool            _fd;
     bool            _fin;
+    bool            _all;
+    int             _check;
 public:
     explicit AbstractVM();
     ~AbstractVM();
-    int    readCommand(int ac, char* av);
-    std::map<int, std::string> getMap() const;
-    void                       setMap(int itr, std::string str) const;
-    int                        getFiled_num() const;
+    int                        readCommand(int ac, char* av);
     double                     StrToDouble(const std::string, const size_t);
-    class Overflow_ex: public std::exception{
-    private:
-        std::string _str_type;
-    public:
-        Overflow_ex();
-        Overflow_ex(std::string);
-        virtual ~Overflow_ex() _NOEXCEPT;
-        Overflow_ex(Overflow_ex const & cpy);
-        Overflow_ex &operator=(Overflow_ex const & rhs);
-    };
-    class Pop_ex: public std::exception{
-    public:
-        Pop_ex();
-        Pop_ex(AbstractVM const & rhs);
-        virtual ~Pop_ex() throw();
-        Pop_ex(Pop_ex const & cpy);
-        Pop_ex & operator=(Pop_ex const & rhs);
-    };
-    class Assert_ex : public std::exception{
-    public:
-        Assert_ex();
-        virtual ~Assert_ex() throw();
-        Assert_ex(Assert_ex const & cpy);
-        Assert_ex & operator=(Assert_ex const & rhs);
-    };
 
     class Read_ex: public std::exception{
     public:

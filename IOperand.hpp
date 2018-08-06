@@ -21,7 +21,13 @@
 #define Over_int8 (str.find("int8") != std::string::npos && (sz > INT8_MAX || sz < INT8_MIN))
 #define Over_int16 (str.find("int16") != std::string::npos && (sz > INT16_MAX || sz < INT16_MIN))
 #define Over_int32 (str.find("int32") != std::string::npos && (sz > INT32_MAX || sz < INT32_MIN))
-#define Over_float (str.find("float") != std::string::npos && (sz > FLT_MAX || sz < FLT_MIN))
+#define Over_float (str.find("float") != std::string::npos && (sz > FLT_MAX || sz < -FLT_MAX))
+#define Lex_error (!std::regex_match(line.begin(), line.end(), rule))
+#define Stdin_exit (std::regex_match(line.begin(), line.end(), std::regex("^;;")) && !_fd)
+#define Comment (std::regex_match(line.begin(), line.end(), std::regex("^[ \\t]*?;.*")))
+#define RED "\033[0;31m"
+#define GRN "\033[1;32m"
+#define CL "\033[0m"
 
 enum eOperandType {Int8, Int16, Int32, Float, Double};
 
