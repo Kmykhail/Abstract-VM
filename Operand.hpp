@@ -23,11 +23,11 @@ public:
         _type = type;
         _precision = precison;
         if (_precision > 0)
-            _ssObj << std:: fixed << std::setprecision(_precision) << val;
+            _ssObj << std::fixed << std::setprecision(_precision) << val;
         else
             _ssObj << val;
-        this->toString();
         _ssObj >> _some_value;
+        _str = _ssObj.str();
     }
     Operand(Operand const & rhs){ *this = rhs; }
     Operand & operator=(Operand const & rhs){
@@ -83,8 +83,6 @@ public:
     std::string const & toString(void) const {
         if (_type == Int8)
             _str = std::to_string((int)_ssObj.str().c_str()[0]);
-        else
-            _str = _ssObj.str();
         return _str;
     }
 };

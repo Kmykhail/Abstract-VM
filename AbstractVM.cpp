@@ -21,7 +21,7 @@ AbstractVM::AbstractVM(){
 }
 
 void AbstractVM::initVM() {
-    _vec_class = new Virtual_Machine;
+    _vec_class = new My_Vector;
     _prec = 0;
     _filed_num = 0;
     _check = 0;
@@ -36,8 +36,8 @@ AbstractVM::~AbstractVM() {
 
 void AbstractVM::Ask() {
     std::string i;
-    std::cout << GRN << "Enter 1 - mixed output [command + result]" <<std::endl;
-    std::cout << "Enter 2 or else - you will see only result" << CL << std::endl;
+    std::cout << GRN << "Enter 1 - Mixed output [command + result]" <<std::endl;
+    std::cout << "Enter 2 or else - Result output" << CL << std::endl;
     std::cin >> i;
     _all = (i == "1") ? true : _all;
     std::cin.clear();
@@ -52,7 +52,7 @@ int    AbstractVM::readCommand(int ac, char *av) {
     if (ac == 1)
     {
         for (int i = 0; !_fin && std::getline(std::cin, buff); i++) {
-            if (buff.empty() || std::regex_match(buff.begin(), buff.end(), std::regex("[ \t]*|\\n*")))
+            if (buff.empty() || std::regex_match(buff.begin(), buff.end(), std::regex("[ \t]*")))
                 continue;
             _check = checkValid(buff);
             if (_check < 0 || _check == 1)
@@ -63,6 +63,8 @@ int    AbstractVM::readCommand(int ac, char *av) {
         _fd = true;
         for (int i = 0; std::getline(file, buff); ++i) {
             _check = checkValid(buff);
+            if (buff.empty() || std::regex_match(buff.begin(), buff.end(), std::regex("[ \t]*")))
+                continue;
             if (_check < 0 || _check == 1)
                 _lex_map[_filed_num++] = (_check < 0) ? ("Error: Lexical error") : ("Comment");
         }
@@ -70,7 +72,7 @@ int    AbstractVM::readCommand(int ac, char *av) {
     }
     std::cout << "-------------------" << std::endl;
     if(_lex_map.empty() && _fd)
-        std::cout << "Error: Empty file" << std::endl;
+        std::cout << RED << "Error: Empty file" << CL << std::endl;
     else
         Print_map();
     return 0;
@@ -78,14 +80,18 @@ int    AbstractVM::readCommand(int ac, char *av) {
 
 void AbstractVM::Print_map() {
     Ask();
+    bool ch_exit = false;
     for (std::map<int, std::string>::iterator it = _lex_map.begin(); it != _lex_map.end() ; it++) {
-            if (it->second.find("Error") != std::string::npos)
-                std::cout << RED << "Line:" << "[" << it->first + 1 << "] =>" << CL << it->second << std::endl;
-            else if (std::regex_search(it->second.begin(), it->second.end(), std::regex("dump|print")))
-                std::cout << GRN << "Line:" << "[" << it->first + 1 << "] =>" << CL << it->second << std::endl;
-            else if (_all)
-                std::cout << "Line:" << "[" << it->first + 1 << "] =>" << it->second << std::endl;
+        ch_exit = (_fd && !ch_exit && it->second.find("exit") != std::string::npos) ? true : ch_exit;
+        if (it->second.find("Error") != std::string::npos)
+            std::cout << RED << "Line:" << "[" << it->first + 1 << "] =>" << CL << it->second << std::endl;
+        else if (std::regex_search(it->second.begin(), it->second.end(), std::regex("dump|print|assert")))
+            std::cout << GRN << "Line:" << "[" << it->first + 1 << "] =>" << CL << it->second << std::endl;
+        else if (_all)
+            std::cout << "Line:" << "[" << it->first + 1 << "] =>" << it->second << std::endl;
     }
+    if (!ch_exit && _fd)
+        std::cout << RED << "Error: No `exit` command" << CL << std::endl;
 }
 
 double AbstractVM::StrToDouble(const std::string str, const size_t l) {
@@ -93,8 +99,20 @@ double AbstractVM::StrToDouble(const std::string str, const size_t l) {
     ssobj << std::fixed << std::setprecision(l) << str.c_str() + 1 << std::endl;
     double res;
     ssobj >> res;
+    std::string stroka = std::regex_replace(std::to_string(res), std::regex("^[-]*?[0-9]*[.]"), "");
+    if (std::regex_match(stroka.begin(), stroka.end(), std::regex("^[0]+")))
+        _prec = 0;
+    else
+        _prec = (stroka.size() > l) ? l : stroka.size();
     return res;
 }
+
+std::string AbstractVM::DoubleToStr(double val) {
+    std::stringstream ssObj;
+    ssObj << val;
+    return ssObj.str();
+}
+
 
 int AbstractVM::Parse_error(std::string line, std::regex rule) {
     if (Lex_error) {
@@ -102,7 +120,9 @@ int AbstractVM::Parse_error(std::string line, std::regex rule) {
     }
     else if (Stdin_exit){
         _fin = true;
-        return (_filed_num && _lex_map[_filed_num - 1].find("exit") != std::string::npos) ? 0 : -1;
+        if ((_filed_num && _lex_map[_filed_num - 1].find("exit") == std::string::npos) || !_filed_num)
+            _lex_map[_filed_num++] = "Error: No `exit` OR `exit` and `;;` not one by one";
+        return 0;
     }
     else
         return 1;
@@ -176,7 +196,6 @@ void AbstractVM::pop(std::string str) {
 
 void AbstractVM::assert(std::string str) {
     std::smatch sm;
-    int eType = typeStr(str);
     std::regex_search(str, sm, std::regex("[\\(][-]*?[0-9]*[.]?[0-9]+"));
     double sz = std::stod(sm.str().c_str() + 1);
     if (Over_int8 || Over_int16 || Over_int32 || Over_float || !_vec_class->getVector().size()) {
@@ -185,9 +204,8 @@ void AbstractVM::assert(std::string str) {
         _lex_map[_filed_num++] += (!_vec_class->getVector().size()) ? "Stack size is ZERO]" : ("Overflow on " + sm.str() + "]");
         return;
     }
-    else if (eType != _vec_class->getLastTypeOperand() || sm.str() != _vec_class->getLastValFromVector()) {
-        _lex_map[_filed_num] = "Error: Assert=>[Wrong ";
-        _lex_map[_filed_num++] += (eType != _vec_class->getLastTypeOperand()) ? "type]" : "value]";
+    else if (sm.str().c_str() + 1 != _vec_class->getLastValFromVector()) {
+        _lex_map[_filed_num++] = "Error: Assert=>[Wrong value]";
         return;
     }
     _lex_map[_filed_num++] = str + ":\n  " + _vec_class->getLastValFromVector();
@@ -305,5 +323,5 @@ AbstractVM::Read_ex& AbstractVM::Read_ex::operator=(Read_ex const &rhs) {
 }
 
 const char* AbstractVM::Read_ex::what() const throw() {
-    return "Usage: [./a.out] | [./a.out][valid file] | [./a.out][valid file]\n";
+    return "Usage: [./a.out] | [./a.out][valid file]\n";
 }

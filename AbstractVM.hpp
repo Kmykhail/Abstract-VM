@@ -5,13 +5,15 @@
 #ifndef AVM_ABSTRACTVM_HPP
 #define AVM_ABSTRACTVM_HPP
 
-#include "Virtual_Machine.hpp"
+#include "Vector.hpp"
 
 class AbstractVM {
 private:
     void    Ask();
     int     Parse_error(std::string line, std::regex rule);
     void    Print_map();
+    double  StrToDouble(const std::string, const size_t);
+    std::string DoubleToStr(double val);
     int     checkValid(std::string line);
     void    initVM();
     void    push(std::string);
@@ -26,7 +28,7 @@ private:
     void    print(std::string);
     void    exit(std::string);
     int               _filed_num;
-    Virtual_Machine *_vec_class;
+    My_Vector *_vec_class;
     mutable std::map<int, std::string> _lex_map;
     int             _prec;
     bool            _fd;
@@ -37,8 +39,6 @@ public:
     explicit AbstractVM();
     ~AbstractVM();
     int                        readCommand(int ac, char* av);
-    double                     StrToDouble(const std::string, const size_t);
-
     class Read_ex: public std::exception{
     public:
         Read_ex();
