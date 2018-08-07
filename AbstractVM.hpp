@@ -13,7 +13,6 @@ private:
     int     Parse_error(std::string line, std::regex rule);
     void    Print_map();
     double  StrToDouble(const std::string, const size_t);
-    std::string DoubleToStr(double val);
     int     checkValid(std::string line);
     void    initVM();
     void    push(std::string);
@@ -38,7 +37,10 @@ private:
 public:
     explicit AbstractVM();
     ~AbstractVM();
+    AbstractVM(AbstractVM const & rhs);
+    AbstractVM & operator=(AbstractVM const & rhs);
     int                        readCommand(int ac, char* av);
+    std::vector<IOperand*>                  getVecClass() const;
     class Read_ex: public std::exception{
     public:
         Read_ex();

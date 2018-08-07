@@ -34,6 +34,26 @@ AbstractVM::~AbstractVM() {
     delete _vec_class;
 }
 
+AbstractVM::AbstractVM(AbstractVM const &rhs) { *this = rhs; }
+
+AbstractVM& AbstractVM::operator=(AbstractVM const &rhs) {
+    if (this  != &rhs){
+        _filed_num = rhs._filed_num;
+        _prec = rhs._prec;
+        _fd = rhs._fd;
+        _fin = rhs._fin;
+        _all = rhs._all;
+        _check = rhs._check;
+        delete _vec_class;
+        _vec_class = new My_Vector;
+        _vec_class->setVector(rhs.getVecClass());
+    }
+    return *this;
+}
+
+std::vector<IOperand*> AbstractVM::getVecClass() const {
+    return _vec_class->getVector();
+}
 void AbstractVM::Ask() {
     std::string i;
     std::cout << GRN << "Enter 1 - Mixed output [command + result]" <<std::endl;
@@ -106,13 +126,6 @@ double AbstractVM::StrToDouble(const std::string str, const size_t l) {
         _prec = (stroka.size() > l) ? l : stroka.size();
     return res;
 }
-
-std::string AbstractVM::DoubleToStr(double val) {
-    std::stringstream ssObj;
-    ssObj << val;
-    return ssObj.str();
-}
-
 
 int AbstractVM::Parse_error(std::string line, std::regex rule) {
     if (Lex_error) {
@@ -321,7 +334,6 @@ AbstractVM::Read_ex& AbstractVM::Read_ex::operator=(Read_ex const &rhs) {
     (void)rhs;
     return *this;
 }
-
 const char* AbstractVM::Read_ex::what() const throw() {
     return "Usage: [./a.out] | [./a.out][valid file]\n";
 }

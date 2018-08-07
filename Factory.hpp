@@ -6,7 +6,6 @@
 
 #include "IOperand.hpp"
 
-//class Factory;
 
 class Factory {
 public:

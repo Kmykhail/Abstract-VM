@@ -19,7 +19,7 @@ private:
     std::stringstream _ssObj;
 public:
     Operand(){}
-    Operand(T val, eOperandType type, int precison) {
+    explicit Operand(T val, eOperandType type, int precison) {
         _type = type;
         _precision = precison;
         if (_precision > 0)
@@ -32,6 +32,7 @@ public:
     Operand(Operand const & rhs){ *this = rhs; }
     Operand & operator=(Operand const & rhs){
         if (this != &rhs){
+            _ssObj = getDigitVal();
             getDigitVal() >> _some_value;
             _str = rhs.toString();
             _precision = rhs.getPrecision();
