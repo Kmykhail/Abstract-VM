@@ -20,7 +20,7 @@ to the end of the file
 ### Compiling:
   `$> make`
 ### Usage:
-  [`./avm` without parameters: reading from standard input]
+  [`./avm` without parameters: reading from standard input]</br>
   [`./avm [some file]`]
 ### Example:
 ```
