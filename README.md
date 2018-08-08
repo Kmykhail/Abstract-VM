@@ -14,8 +14,10 @@ It's vety simple vitrtual machine, which will run some basic arithemetic program
   `print`: Asserts that the value at the top of the stack is an 8-bit integer.</br>
   `exit`: Terminate the execution of the current program.</br>
  ##### Exceptions:
-  When use arithmetic instructions, stack must contain at least 2 values, otherwise I catch an exception and continue reading
-to the end of the file
+  1. Problems reading files\
+  2. When use arithmetic instructions, stack must contain at least 2 values, otherwise I catch an exception and continue reading to the end of the file\
+  3. Type overflow\
+  4. Division by zero
 
 ### Compiling:
   `$> make`
