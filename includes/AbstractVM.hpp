@@ -9,31 +9,33 @@
 
 class AbstractVM {
 private:
-    void    Ask();
-    int     Parse_error(std::string line, std::regex rule);
-    void    Print_map();
-    double  StrToDouble(const std::string, const size_t);
-    int     checkValid(std::string line);
-    void    initVM();
-    void    push(std::string);
-    void    dump(std::string);
-    void    pop(std::string);
-    void    assert(std::string);
-    void    add(std::string);
-    void    sub(std::string);
-    void    mul(std::string);
-    void    div(std::string);
-    void    mod(std::string);
-    void    print(std::string);
-    void    exit(std::string);
-    int               _filed_num;
+    void    		Ask();
+    int     		Parse_error(std::string line, std::regex rule);
+    void    		Print_map();
+    double  		StrToDouble(const std::string, const size_t);
+    std::string     CorectStr(std::string val);
+    int     		checkValid(std::string line);
+    void    		initVM();
+    void    		push(std::string);
+    void    		dump(std::string);
+    void    		pop(std::string);
+    void   			assert(std::string);
+    void    		add(std::string);
+    void    		sub(std::string);
+    void    		mul(std::string);
+    void    		div(std::string);
+    void    		mod(std::string);
+    void    		print(std::string);
+    void    		exit(std::string);
+
+    int               					_filed_num;
     My_Vector *_vec_class;
-    mutable std::map<int, std::string> _lex_map;
-    int             _prec;
-    bool            _fd;
-    bool            _fin;
-    bool            _all;
-    int             _check;
+    mutable std::map<int, std::string>	_lex_map;
+    int             					_prec;
+    bool            					_fd;
+    bool            					_fin;
+    bool            					_all;
+    int             					_check;
 public:
     explicit AbstractVM();
     ~AbstractVM();

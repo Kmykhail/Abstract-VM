@@ -4,6 +4,31 @@
 
 #include "AbstractVM.hpp"
 
+double AbstractVM::StrToDouble(const std::string str, const size_t l) {
+    std::stringstream ssobj;
+    ssobj << std::fixed << std::setprecision(l) << str.c_str() + 1 << std::endl;
+    double res;
+    ssobj >> res;
+    std::string stroka = std::regex_replace(std::to_string(res), std::regex("^[-]*?[0-9]*[.]"), "");
+    if (std::regex_match(stroka.begin(), stroka.end(), std::regex("^[0]+")))
+        _prec = 0;
+    else
+        _prec = (stroka.size() > l) ? l : stroka.size();
+    return res;
+}
+
+std::string AbstractVM::CorectStr(std::string val){
+    size_t prec = 0;
+    val = std::regex_replace(val, std::regex("^[ \\t]*?[a-z]* [ \\t]*?[a-z]{3,6}[0-9]*?[\\(]"), "");
+    val = std::regex_replace(val, std::regex("[\\)]"), "");
+    prec = (val.find('.') != std::string::npos) ? val.size() - 1 - val.find('.') : 0;
+    std::string check = std::regex_replace(val, std::regex("^[-]*?[0-9]*[.]"), "");
+    if (std::regex_match(check.begin(), check.end(), std::regex("^[0]+"))) {
+        val = val.substr(0, val.find('.'));
+        return val;
+    }
+    return val;
+}
 int         typeStr(std::string str){
     if (str.find("int8") != std::string::npos)
         return 0;
@@ -114,19 +139,6 @@ void AbstractVM::Print_map() {
         std::cout << RED << "Error: No `exit` command" << CL << std::endl;
 }
 
-double AbstractVM::StrToDouble(const std::string str, const size_t l) {
-    std::stringstream ssobj;
-    ssobj << std::fixed << std::setprecision(l) << str.c_str() + 1 << std::endl;
-    double res;
-    ssobj >> res;
-    std::string stroka = std::regex_replace(std::to_string(res), std::regex("^[-]*?[0-9]*[.]"), "");
-    if (std::regex_match(stroka.begin(), stroka.end(), std::regex("^[0]+")))
-        _prec = 0;
-    else
-        _prec = (stroka.size() > l) ? l : stroka.size();
-    return res;
-}
-
 int AbstractVM::Parse_error(std::string line, std::regex rule) {
     if (Lex_error) {
         return -1;
@@ -169,7 +181,8 @@ void AbstractVM::push(std::string str) {
     double sz = StrToDouble(sm.str(), _prec);
     if (Over_int8 || Over_int16 || Over_int32 || Over_float) {
         std::regex_search(str, sm, std::regex("[a-z]+[0-9]+|double|float"));
-        _lex_map[_filed_num++] = "Error: Push=>[Overflow on " + sm.str() + "]";
+        _lex_map[_filed_num] = "Error: Push=>[";
+        _lex_map[_filed_num++] += (sz > 0) ? "Overflow on " + sm.str() + "]" : "Underflow on " + sm.str() + "]";
         return;
     }
     if (std::regex_search(str, sm, std::regex("^(?!;)[ \\t]*?push[ \\t]*?int8")))
@@ -213,8 +226,10 @@ void AbstractVM::assert(std::string str) {
     double sz = std::stod(sm.str().c_str() + 1);
     if (Over_int8 || Over_int16 || Over_int32 || Over_float || !_vec_class->getVector().size()) {
         std::regex_search(str, sm, std::regex("[a-z]+[0-9]+|double|float"));
-        _lex_map[_filed_num] = "Error: Assert=>[";
-        _lex_map[_filed_num++] += (!_vec_class->getVector().size()) ? "Stack size is ZERO]" : ("Overflow on " + sm.str() + "]");
+        if (!_vec_class->getVector().size())
+            _lex_map[_filed_num++] += "Stack size is ZERO]";
+        else
+            _lex_map[_filed_num++] += (sz < 0) ? ("Underflow on " + sm.str() + "]") : ("Overflow on " + sm.str() + "]");
         return;
     }
     else if (sm.str().c_str() + 1 != _vec_class->getLastValFromVector()) {
