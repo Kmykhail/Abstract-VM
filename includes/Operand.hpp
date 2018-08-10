@@ -29,8 +29,8 @@ public:
         _ssObj >> _some_value;
         _str = _ssObj.str();
     }
-    Operand(Operand const & rhs){ *this = rhs; }
-    Operand & operator=(Operand const & rhs){
+    Operand<T>(Operand<T> const & rhs){ *this = rhs; }
+    Operand<T> & operator=(Operand<T> const & rhs){
         if (this != &rhs){
             _ssObj = getDigitVal();
             getDigitVal() >> _some_value;
@@ -40,7 +40,7 @@ public:
         }
         return *this;
     }
-    ~Operand(){}
+    ~Operand<T>(){}
 
     int getPrecision( void ) const { return _precision; }
     eOperandType getType(void) const { return _type; }
