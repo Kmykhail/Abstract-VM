@@ -1,6 +1,6 @@
 # Abstract-VM
 Goal of this project is create a simple virtual machine that can interpret programs written in a basic assembly language.</br>
-It's vety simple vitrtual machine, which will run some basic arithemetic programs coded in a very basic assembly language.</br>
+It's very simple vitrtual machine, which will run some basic arithemetic programs coded in a very basic assembly language.</br>
 ##### Abstract is composed of a series of instructions:
   `push int[8|16|32] | float | double(value)`: Push the value at the top of the stack.</br>
   `pop`: Unstack the value from the top of the stack. If the stack is empty, the program execution must stop with an error.</br>
